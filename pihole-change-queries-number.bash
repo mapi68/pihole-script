@@ -44,7 +44,7 @@ echo && echo
 
 read -p "Do you want to load optimal values for medium pihole server? (Y/n) " -n 1 -r -s
 if ! [[ $REPLY =~ ^[Nn]$ ]]; then
-	f=15 && t=25 && b=$t
+	f=15 && t=30 && b=$t
 	echo && valori && exit 0
 fi
 echo && echo
