@@ -11,3 +11,7 @@ Optimal mode (for medium server)
 Manual mode (allowed from 10 to 99 queries)
 
 ![Manual mode](images/manual.png)
+
+Dashboard results
+
+![Manual mode](images/top.png)
