@@ -28,7 +28,7 @@ fi
 echo
 echo "********************* Hello $USER! *********************"
 echo
-echo "This script changes queries number shown in pihole."
+echo "This script changes queries number shown in pihole v5."
 echo "Resetting to default value (10)..."
 sed -i 's/getQuerySources=[0-9][0-9]\&topClientsBlocked=[0-9][0-9]/getQuerySources\&topClientsBlocked/' $A
 sed -i 's/getQuerySources=&topClientsBlocked=/getQuerySources\&topClientsBlocked/' $A
