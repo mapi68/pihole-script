@@ -78,5 +78,4 @@ if [ "$h" -gt 99 ] || [ "$h" -lt 10 ]; then
 	echo -e "${RED}${BOLD}✗ Invalid value!${NC} ${RED}Must be between 10 and 99.${NC}" && echo && exit 1
 fi
 
-
 valori && echo && exit 0
