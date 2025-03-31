@@ -15,10 +15,10 @@ A="/var/www/html/admin/scripts/js/index.js"
 
 valori() {
 	echo
-	sed -i "s/\/api\/stats\/top_domains?blocked=true\";/\/api\/stats\/top_domains?blocked=true\&count=$f\";/" $A
-	sed -i "s/\/api\/stats\/top_domains\";/\/api\/stats\/top_domains?blocked=false\&count=$f\";/" $A
-	sed -i "s/\/api\/stats\/top_clients?blocked=true\";/\/api\/stats\/top_clients?blocked=true\&count=$h\";/" $A
-	sed -i "s/\/api\/stats\/top_clients\";/\/api\/stats\/top_clients?blocked=false\&count=$h\";/" $A
+	sed -i "s/\/stats\/top_domains?blocked=true\";/\/stats\/top_domains?blocked=true\&count=$f\";/" $A
+	sed -i "s/\/stats\/top_domains\";/\/stats\/top_domains?blocked=false\&count=$f\";/" $A
+	sed -i "s/\/stats\/top_clients?blocked=true\";/\/stats\/top_clients?blocked=true\&count=$h\";/" $A
+	sed -i "s/\/stats\/top_clients\";/\/stats\/top_clients?blocked=false\&count=$h\";/" $A
 
 	echo -e "${GREEN}${BOLD}✓ ${NC}${GREEN}${BOLD}Query numbers have been updated successfully!${NC}"
 	echo -e " ${LIGHTBLUE}${BOLD}$f${NC} for 'Top Permitted Domains${NC}' and 'Top Blocked Domains${NC}'"
