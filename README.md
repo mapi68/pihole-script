@@ -29,7 +29,7 @@
 
 ## 🌟 Overview <a name="overview"></a>
 
-A growing collection of Bash scripts to manage, customize, and extend Pi-hole beyond its default capabilities — including dashboard tweaks and cron job management.
+A growing collection of Bash scripts to manage, customize, and extend Pi-hole beyond its default capabilities — including dashboard tweaks, cron job management, and live system monitoring.
 
 ---
 
@@ -86,7 +86,7 @@ Manage Pi-hole scheduled tasks from an interactive menu. Applies, removes, and m
 | 🗑️ **Remove** | Deletes the cron file with confirmation |
 | 📋 **Show Log** | Displays the last 30 lines of the updateGravity log |
 | ▶️ **Run Now** | Runs `updateGravity` immediately with live output |
-| 🖥️ **Interactive UI** | Menu-driven interface with color-coded output |
+| 🖥️ **Interactive UI** | Menu-driven with return-to-menu after each action |
 
 #### Default Schedule
 
@@ -95,6 +95,36 @@ Manage Pi-hole scheduled tasks from an interactive menu. Applies, removes, and m
 ```
 
 > **updateGravity** runs Monday through Saturday at **05:05**, with output saved to `/var/log/pihole_updateGravity.log`.
+
+---
+
+### 📡 3. Pi-hole Status Report
+
+A live terminal dashboard that auto-refreshes every 10 seconds, showing a full overview of your Pi-hole instance — functionality not available natively in Pi-hole.
+
+| Script | Compatible With |
+|---|---|
+| `pihole-status-report.bash` | Pi-hole v6 |
+
+#### Features
+
+| Feature | Description |
+|---|---|
+| 🔄 **Live Refresh** | Auto-updates every 10 seconds |
+| 📦 **Versions** | Pi-hole and FTL current version |
+| ⏱️ **Uptime** | System uptime at a glance |
+| ⚙️ **Services** | Status of pihole-FTL and cron |
+| 📊 **Queries Today** | Total queries, blocked count, block rate with visual bar |
+| 🌍 **Gravity** | Number of domains in the gravity database |
+| 💾 **Resources** | RAM and disk usage with visual bars |
+| 🚫 **Top Blocked Domains** | Top 5 domains blocked today |
+| 🖥️ **Top Clients** | Top 5 clients by query count |
+
+#### Notes
+
+- Uses the Pi-hole v6 REST API (`/api/`) for all data
+- Authenticates automatically via `/etc/pihole/cli_pw`
+- Press `Ctrl+C` to exit cleanly
 
 ---
 
@@ -140,6 +170,14 @@ sudo ./pihole-cron-manager.bash
 
 After running the query modifier, refresh your Pi-hole web interface to see the updated numbers.
 
+### Status Report
+
+```bash
+sudo ./pihole-status-report.bash
+```
+
+Press `Ctrl+C` to exit the live dashboard.
+
 ---
 
 ## ❗ Troubleshooting <a name="troubleshooting"></a>
@@ -148,6 +186,7 @@ After running the query modifier, refresh your Pi-hole web interface to see the 
 - Error messages are color-coded for easy identification
 - Invalid inputs are handled gracefully with clear error messages
 - The cron manager shows the current active schedule at startup before any action is taken
+- The status report requires Pi-hole v6 and authenticates automatically via `/etc/pihole/cli_pw`
 
 ### Reverting Query Number Changes
 
