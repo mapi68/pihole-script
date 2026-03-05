@@ -1,145 +1,188 @@
-# 📊 Pi-hole Query Number Modifier
+<p align="center">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/>
+  <img src="https://img.shields.io/badge/Shell-100%25-brightgreen.svg" alt="Shell Script"/>
+  <img src="https://img.shields.io/badge/Pi--hole-v5-blue.svg" alt="Pi-hole v5"/>
+  <img src="https://img.shields.io/badge/Pi--hole-v6-blue.svg" alt="Pi-hole v6"/>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Shell Script](https://img.shields.io/badge/Shell-100%25-brightgreen.svg)]()
-[![Pi-hole v5](https://img.shields.io/badge/Pi--hole-v5-blue.svg)]()
-[![Pi-hole v6](https://img.shields.io/badge/Pi--hole-v6-blue.svg)]()
+<h1 align="center">🛠️ Pi-hole Scripts Collection</h1>
 
-A collection of scripts to customize the number of queries displayed in Pi-hole's dashboard for both v5 and v6.
+<p align="center">
+  <strong>A collection of utility scripts to extend and customize your Pi-hole installation.</strong>
+</p>
 
-## 🌟 Overview
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#scripts">Scripts</a> •
+  <a href="#install">Install</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#troubleshooting">Troubleshooting</a>
+</p>
 
-These scripts allow you to modify how many queries are displayed in various sections of the Pi-hole dashboard, including:
-- 📝 Top Permitted Domains
-- 🚫 Top Blocked Domains
-- 👥 Top Clients (total)
-- ⛔ Top Clients (blocked only)
+<p align="center">
+  <a href="https://ko-fi.com/mapi68">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support on Ko-fi"/>
+  </a>
+</p>
 
-## 🔄 Version Compatibility
+---
 
-- 📌 `pihole-change-queries-number_v5.bash` - Compatible with Pi-hole v5
-- 📌 `pihole-change-queries-number_v6.bash` - Compatible with Pi-hole v6
+## 🌟 Overview <a name="overview"></a>
 
-## ✨ Features
+A growing collection of Bash scripts to manage, customize, and extend Pi-hole beyond its default capabilities — including dashboard tweaks and cron job management.
 
-- 🔄 Reset to default values (10 queries)
-- ⚡ Predefined optimal values for medium-sized servers
-- 🎛️ Custom configuration (10-99 queries)
-- 🎨 Color-coded terminal output (v6 script)
-- 🔙 Restore functionality
-- 🖥️ User-friendly interactive interface
+---
 
-## 📋 Prerequisites
+## 📦 Scripts <a name="scripts"></a>
 
-- 🔑 Root access to your Pi-hole server
-- 🚀 Running Pi-hole v5 or v6 installation
-- 💻 Basic command line knowledge
+### 📊 1. Pi-hole Query Number Modifier
 
-## 🛠️ Installation
+Modify how many entries are displayed in the Pi-hole dashboard (Top Permitted Domains, Top Blocked Domains, Top Clients).
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/mapi68/pihole-script.git
-   ```
+| Script | Compatible With |
+|---|---|
+| `pihole-change-queries-number_v5.bash` | Pi-hole v5 |
+| `pihole-change-queries-number_v6.bash` | Pi-hole v6 |
 
-2. Navigate to the script directory:
-   ```bash
-   cd pihole-script
-   ```
+#### Features
 
-3. Make the script executable:
-   ```bash
-   chmod +x pihole-change-queries-number_v6.bash  # For Pi-hole v6
-   # OR
-   chmod +x pihole-change-queries-number_v5.bash  # For Pi-hole v5
-   ```
+| Feature | Description |
+|---|---|
+| 🔄 **Reset** | Restore default values (10 queries) |
+| ⚡ **Optimal Mode** | Predefined values tuned for medium-sized servers |
+| 🎛️ **Manual Mode** | Custom configuration from 10 to 99 queries |
+| 🎨 **Color Output** | Color-coded terminal interface |
+| 🖥️ **Interactive UI** | User-friendly guided setup |
 
-## 📝 Usage
+#### Configuration
 
-### For Pi-hole v6:
+**Optimal Mode** — Sets Top Domains to 15 entries and Top Clients to 30 entries.
+
+![Optimal Mode - v6](images/optimal_v6.png)
+
+**Manual Mode** — Full control over all query number settings (10–99).
+
+![Manual Mode - v6](images/manual_v6.png)
+
+**Dashboard Result**
+
+![Dashboard Results](images/top.png)
+
+---
+
+### ⏰ 2. Pi-hole Cron Manager
+
+Manage Pi-hole scheduled tasks from an interactive menu. Applies, removes, and monitors cron jobs for Pi-hole — with no manual editing of cron files required.
+
+| Script | Compatible With |
+|---|---|
+| `pihole-cron-manager.bash` | Pi-hole v5 & v6 |
+
+#### Features
+
+| Feature | Description |
+|---|---|
+| ✅ **Apply / Restore** | Writes the default schedule to `/etc/cron.d/pihole_custom` and restarts cron |
+| 🗑️ **Remove** | Deletes the cron file with confirmation |
+| 📋 **Show Log** | Displays the last 30 lines of the updateGravity log |
+| ▶️ **Run Now** | Runs `updateGravity` immediately with live output |
+| 🖥️ **Interactive UI** | Menu-driven interface with color-coded output |
+
+#### Default Schedule
+
+```
+5 5 * * 1-6   root   pihole updateGravity > /var/log/pihole_updateGravity.log
+```
+
+> **updateGravity** runs Monday through Saturday at **05:05**, with output saved to `/var/log/pihole_updateGravity.log`.
+
+---
+
+## 📋 Prerequisites <a name="prerequisites"></a>
+
+- Root access to your Pi-hole server
+- Running Pi-hole v5 or v6 installation
+- Basic command line knowledge
+
+---
+
+## 🛠️ Install <a name="install"></a>
+
+Clone the repository and make scripts executable:
+
+```bash
+git clone https://github.com/mapi68/pihole-script.git
+cd pihole-script
+chmod +x *.bash
+```
+
+---
+
+## 📝 Usage <a name="usage"></a>
+
+### Query Number Modifier
+
+For Pi-hole v6:
 ```bash
 sudo ./pihole-change-queries-number_v6.bash
 ```
 
-### For Pi-hole v5:
+For Pi-hole v5:
 ```bash
 sudo ./pihole-change-queries-number_v5.bash
 ```
 
-## ⚙️ Configuration Options
+### Cron Manager
 
-### 🔵 Pi-hole v5
+```bash
+sudo ./pihole-cron-manager.bash
+```
 
-#### Optimal Mode (Recommended for medium servers)
-![Optimal Mode - v5](images/optimal_v5.png)
-*Pi-hole v5 Optimal Mode Configuration*
-- ✅ Sets optimized values for a medium-sized Pi-hole server
-- ✅ Top Domains: 15 entries
-- ✅ Top Clients: 30 entries
+After running the query modifier, refresh your Pi-hole web interface to see the updated numbers.
 
-#### Manual Mode
-![Manual Mode - v5](images/manual_v5.png)
-*Pi-hole v5 Manual Configuration*
-- 🔧 Customize the number of entries (10-99) for:
-  - Top Permitted Domains
-  - Top Blocked Domains
-  - Top Clients (total)
-  - Top Clients (blocked only)
+---
 
-### 🔵 Pi-hole v6
+## ❗ Troubleshooting <a name="troubleshooting"></a>
 
-#### Optimal Mode
-![Optimal Mode - v6](images/optimal_v6.png)
-*Pi-hole v6 Optimal Mode Configuration*
-- ✅ Sets optimized values for a medium-sized Pi-hole server
-- ✅ Enhanced color-coded interface
-- ✅ Top Domains: 15 entries
-- ✅ Top Clients: 30 entries
+- The query modifier script (v6) automatically re-downloads the original `index.js` from the Pi-hole repository before applying changes
+- Error messages are color-coded for easy identification
+- Invalid inputs are handled gracefully with clear error messages
+- The cron manager shows the current active schedule at startup before any action is taken
 
-#### Manual Mode
-![Manual Mode - v6](images/manual_v6.png)
-*Pi-hole v6 Manual Configuration*
-- 🎨 Modern interface with color-coded messages
-- 🔧 Customize the number of entries (10-99) for:
-  - Top Permitted Domains
-  - Top Blocked Domains
-  - Top Clients (total)
-  - Top Clients (blocked only)
+### Reverting Query Number Changes
 
-#### Dashboard Result
-![Dashboard Results](images/top.png)
-*Pi-hole Dashboard View (Same layout for both v5 and v6)*
+Run the script again and choose to exit after the reset step — this restores the default value of 10.
 
-## 🚀 After Installation
+### Reverting Cron Changes
 
-After running the script, you'll need to:
-1. 🔄 Refresh your Pi-hole web interface
-2. ✨ The new query numbers will be displayed in the dashboard
+Run `pihole-cron-manager.bash` and choose option **2 (Remove)** to delete the custom cron file, or option **1 (Apply)** to restore the default schedule.
 
-## ❗ Troubleshooting
+---
 
-- 🔄 If you encounter any issues, the script will automatically download the original file from Pi-hole repository (v6)
-- 🎨 Error messages are color-coded for easy identification
-- ✅ Invalid inputs are properly handled with appropriate error messages
+## 📄 License
 
-## ↩️ Reverting Changes
+This project is licensed under the [MIT License](LICENSE).
 
-The script automatically resets to default values (10) before applying new ones. If you need to revert:
-1. 🔄 Run the script again
-2. ⏹️ Choose to exit after the reset
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
 
 ## 👤 Author
 
 - [@mapi68](https://github.com/mapi68)
 
-## 💬 Support
+If you encounter any issues or have questions, please [open an issue](https://github.com/mapi68/pihole-script/issues) on GitHub. Contributions and Pull Requests are welcome!
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/mapi68/pihole-script/issues) on the GitHub repository.
+---
 
-## 🤝 Contributing
+## ☕ Support
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+<p align="center">
+  <a href="https://ko-fi.com/mapi68">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support on Ko-fi"/>
+  </a>
+</p>
+
+---
+
+<p align="center">
+  Made with ❤️ for the Raspberry Pi community
+</p>
