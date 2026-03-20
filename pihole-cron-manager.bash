@@ -37,7 +37,7 @@ apply_cron() {
 
 	cat > "$CRON_FILE" <<EOF
 ########## CRON PIHOLE ##########
-# Managed by pihole-cron-manager_v6.bash
+# Managed by pihole-cron-manager.bash
 # updateGravity: Mon-Sat at 05:05
 5 5 * * 1-6 root PATH="\$PATH:/usr/sbin:/usr/local/bin/" pihole updateGravity >${LOG_FILE} || cat ${LOG_FILE}
 EOF

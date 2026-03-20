@@ -37,8 +37,8 @@ if [[ ! "${EUID}" -eq 0 ]]; then
 fi
 
 echo
-echo -e "${YELLOW}${BOLD} Pi-hole v6 Query Number Modifier ${NC}"
-echo -e "${CYAN}This script modifies the number of queries displayed in Pi-hole v6.${NC}"
+echo -e "${YELLOW}${BOLD} Pi-hole Query Number Modifier ${NC}"
+echo -e "${CYAN}This script modifies the number of queries displayed in Pi-hole.${NC}"
 echo -e "${YELLOW}Resetting to default value (10)...${NC}"
 echo -e "${LIGHTBLUE}${BOLD}Downloading original file from Pi-hole repository...${NC}"
 if wget -q -O $A https://github.com/pi-hole/web/raw/refs/heads/master/scripts/js/index.js; then

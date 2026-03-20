@@ -1,8 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/>
   <img src="https://img.shields.io/badge/Shell-100%25-brightgreen.svg" alt="Shell Script"/>
-  <img src="https://img.shields.io/badge/Pi--hole-v5-blue.svg" alt="Pi-hole v5"/>
-  <img src="https://img.shields.io/badge/Pi--hole-v6-blue.svg" alt="Pi-hole v6"/>
 </p>
 
 <h1 align="center">🛠️ Pi-hole Scripts Collection</h1>
@@ -39,11 +37,6 @@ A growing collection of Bash scripts to manage, customize, and extend Pi-hole be
 
 Modify how many entries are displayed in the Pi-hole dashboard (Top Permitted Domains, Top Blocked Domains, Top Clients).
 
-| Script | Compatible With |
-|---|---|
-| `pihole-change-queries-number_v5.bash` | Pi-hole v5 |
-| `pihole-change-queries-number_v6.bash` | Pi-hole v6 |
-
 #### Features
 
 | Feature | Description |
@@ -58,25 +51,17 @@ Modify how many entries are displayed in the Pi-hole dashboard (Top Permitted Do
 
 **Optimal Mode** — Sets Top Domains to 15 entries and Top Clients to 30 entries.
 
-![Optimal Mode - v6](images/optimal_v6.png)
+![Optimal Mode](images/optimal.png)
 
 **Manual Mode** — Full control over all query number settings (10–99).
 
-![Manual Mode - v6](images/manual_v6.png)
-
-**Dashboard Result**
-
-![Dashboard Results](images/top.png)
+![Manual Mode](images/manual.png)
 
 ---
 
 ### ⏰ 2. Pi-hole Cron Manager
 
 Manage Pi-hole scheduled tasks from an interactive menu. Applies, removes, and monitors cron jobs for Pi-hole — with no manual editing of cron files required.
-
-| Script | Compatible With |
-|---|---|
-| `pihole-cron-manager.bash` | Pi-hole v5 & v6 |
 
 #### Features
 
@@ -96,15 +81,13 @@ Manage Pi-hole scheduled tasks from an interactive menu. Applies, removes, and m
 
 > **updateGravity** runs Monday through Saturday at **05:05**, with output saved to `/var/log/pihole_updateGravity.log`.
 
+![Cron Manager](images/cron.png)
+
 ---
 
 ### 📡 3. Pi-hole Status Report
 
 A live terminal dashboard that auto-refreshes every 10 seconds, showing a full overview of your Pi-hole instance — functionality not available natively in Pi-hole.
-
-| Script | Compatible With |
-|---|---|
-| `pihole-status-report.bash` | Pi-hole v6 |
 
 #### Features
 
@@ -122,27 +105,39 @@ A live terminal dashboard that auto-refreshes every 10 seconds, showing a full o
 
 #### Notes
 
-- Uses the Pi-hole v6 REST API (`/api/`) for all data
+- Uses the Pi-hole REST API (`/api/`) for all data
 - Authenticates automatically via `/etc/pihole/cli_pw`
 - Press `Ctrl+C` to exit cleanly
+
+![Status Report](images/report.png)
 
 ---
 
 ## 📋 Prerequisites <a name="prerequisites"></a>
 
 - Root access to your Pi-hole server
-- Running Pi-hole v5 or v6 installation
+- Running Pi-hole installation
 - Basic command line knowledge
 
 ---
 
 ## 🛠️ Install <a name="install"></a>
 
-Clone the repository and make scripts executable:
+### Option 1 — Clone with Git
 
 ```bash
 git clone https://github.com/mapi68/pihole-script.git
 cd pihole-script
+chmod +x *.bash
+```
+
+### Option 2 — Download ZIP
+
+```bash
+wget https://github.com/mapi68/pihole-script/archive/refs/heads/master.zip
+unzip master.zip
+rm master.zip
+cd pihole-script-master
 chmod +x *.bash
 ```
 
@@ -152,14 +147,8 @@ chmod +x *.bash
 
 ### Query Number Modifier
 
-For Pi-hole v6:
 ```bash
-sudo ./pihole-change-queries-number_v6.bash
-```
-
-For Pi-hole v5:
-```bash
-sudo ./pihole-change-queries-number_v5.bash
+sudo ./pihole-change-queries-number.bash
 ```
 
 ### Cron Manager
@@ -167,8 +156,6 @@ sudo ./pihole-change-queries-number_v5.bash
 ```bash
 sudo ./pihole-cron-manager.bash
 ```
-
-After running the query modifier, refresh your Pi-hole web interface to see the updated numbers.
 
 ### Status Report
 
@@ -182,11 +169,11 @@ Press `Ctrl+C` to exit the live dashboard.
 
 ## ❗ Troubleshooting <a name="troubleshooting"></a>
 
-- The query modifier script (v6) automatically re-downloads the original `index.js` from the Pi-hole repository before applying changes
+- The query modifier script automatically re-downloads the original `index.js` from the Pi-hole repository before applying changes
 - Error messages are color-coded for easy identification
 - Invalid inputs are handled gracefully with clear error messages
 - The cron manager shows the current active schedule at startup before any action is taken
-- The status report requires Pi-hole v6 and authenticates automatically via `/etc/pihole/cli_pw`
+- The status report authenticates automatically via `/etc/pihole/cli_pw`
 
 ### Reverting Query Number Changes
 
