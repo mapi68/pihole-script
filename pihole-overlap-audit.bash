@@ -2,6 +2,8 @@
 #
 # Confronta le liste di blocco di Pi-hole e dà consigli su cosa tenere o togliere.
 # Lingua predefinita: inglese. Con --it i testi sono in italiano.
+# Con --list FILE gli indirizzi delle liste vengono letti da un file di testo
+# e le liste sono scaricate ed elaborate senza usare Pi-hole.
 # Uso, opzioni e formati supportati: ./pihole-overlap-audit.bash --help
 
 # Lingua: letta subito, così vale anche per --help e per gli errori.
@@ -58,6 +60,13 @@ m M_SQL_NODB "gravity.db non trovato (%s): non posso sapere quali liste sono dis
 m M_SQL_DENIED "gravity.db non leggibile (%s): prova con sudo. Intanto analizzo tutte le liste trovate, anche quelle disabilitate." "gravity.db is not readable (%s): try sudo. Meanwhile analyzing all the lists found, including disabled ones."
 m M_MISSING "list.%s (%s) è abilitata ma non ha un file scaricato%s: lancia pihole -g." "list.%s (%s) is enabled but has no downloaded file%s: run pihole -g."
 m M_MISSING_FAILED " (download non riuscito, nessuna copia locale)" " (download failed, no local copy)"
+m M_LIST_ARG "L'opzione --list richiede il percorso di un file (vedi --help)." "The --list option needs a file path (see --help)."
+m M_LIST_NOTOOL "Per scaricare le liste serve curl o wget, ma nessuno dei due è installato." "curl or wget is needed to download the lists, but neither is installed."
+m M_LIST_EMPTY "Nessun indirizzo valido (http:// o https://) trovato in %s." "No valid address (http:// or https://) found in %s."
+m M_LIST_BADLINE "Riga %d di %s ignorata: non è un indirizzo http:// o https://." "Line %d of %s ignored: not an http:// or https:// address."
+m M_LIST_INFO "Scarico %d liste da %s (Pi-hole non viene usato).\n" "Downloading %d lists from %s (Pi-hole is not used).\n"
+m M_LIST_ITEM "  list.%d  %s\n" "  list.%d  %s\n"
+m M_LIST_FAIL "list.%d: download non riuscito (%s), lista saltata." "list.%d: download failed (%s), list skipped."
 m M_SQL_EMPTY "gravity.db non ha restituito liste attive: analizzo tutte le liste trovate." "gravity.db returned no enabled lists: analyzing all the lists found."
 
 # categorie stimate
@@ -88,7 +97,7 @@ m M_C_COVERED "% COPERTA" "% COVERED"
 
 # consigli
 m M_BANNER "=============================== CONSIGLI ===============================" "================================ ADVICE ================================"
-m L_PROTECT "[PROTEGGI]" "[PROTECT] "
+m L_PROTECT "[CAUTELA] " "[PROTECT] "
 m L_REMOVE "[RIMUOVI] " "[REMOVE]  "
 m L_REVIEW "[VALUTA]  " "[REVIEW]  "
 m L_KEEP "[TIENI]   " "[KEEP]    "
@@ -123,6 +132,9 @@ m M_S8_ONE "  Controlla il Query Log dopo gli aggiornamenti; la sola dimensione 
 m M_S8_SPEC "  Le feed specialistiche possono avere un valore di sicurezza distinto: non valutarle solo per dimensione o sovrapposizione." "  Specialist feeds may have a distinct security value: do not judge them by size or overlap alone."
 m M_S9 "9. Cosa fare adesso:" "9. What to do now:"
 m M_S9_1 "  1. Dall'interfaccia web di Pi-hole, nella sezione delle liste, disattiva (non eliminare) queste liste:" "  1. In the Pi-hole web interface, in the lists section, disable (do not delete) these lists:"
+m M_S9_1L "  1. Togli (o commenta con #) queste liste dal file %s:\n" "  1. Remove (or comment out with #) these lists from the file %s:\n"
+m M_S9_2L "  2. Rilancia lo script con il file aggiornato per verificare il nuovo equilibrio." "  2. Run the script again with the updated file to check the new balance."
+m M_S9_THEN_L "  Poi rilancia lo script con il file aggiornato per verificare il risultato." "  Then run the script again with the updated file to check the result."
 m M_S9_2 "  2. Aggiorna il gravity con: pihole -g" "  2. Update gravity with: pihole -g"
 m M_S9_3 "  3. Per qualche giorno guarda il Query Log: se un sito che ti serve viene bloccato, riattiva la lista." "  3. Watch the Query Log for a few days: if a site you need gets blocked, re-enable the list."
 m M_S9_4 "  4. Se non ci sono problemi, elimina definitivamente le liste disattivate." "  4. If there are no problems, delete the disabled lists for good."
@@ -141,12 +153,13 @@ Confronta le liste di blocco di Pi-hole: mostra la percentuale di domini in
 comune tra ogni coppia di liste e dà consigli finali su cosa tenere o togliere.
 
 Uso:
-  $s [opzioni] [cartella/ | lista1 lista2 ...]
+  $s [opzioni] [--list FILE] [cartella/ | lista1 lista2 ...]
 
   Senza percorsi: liste scaricate da Pi-hole; se non ce ne sono, i file
                   della cartella dello script.
   Con cartella:   i .txt, .list e .hosts al suo interno.
   Con file:       solo quelli indicati (almeno 2).
+  Con --list:     le liste scaricate dagli indirizzi del file indicato.
 
 Opzioni:
   -h, --help   mostra questo aiuto
@@ -156,6 +169,8 @@ Opzioni:
   --no-clear   non pulisce lo schermo all'avvio
   --no-sqlite  non legge gravity.db: analizza tutte le liste trovate, anche
                quelle disabilitate, e prende i nomi solo dai file
+  --list FILE  legge da FILE gli indirizzi (uno per riga) delle liste da
+               scaricare e confrontare, senza usare Pi-hole
 
 Liste di Pi-hole:
   Senza percorsi lo script cerca list.*.domains in /etc/pihole e in
@@ -165,8 +180,18 @@ Liste di Pi-hole:
   Segnala anche le liste abilitate che non hanno ancora un file scaricato.
   Per non usarlo: --no-sqlite.
 
+File con l'elenco delle liste (--list):
+  Un indirizzo http:// o https:// per riga. Le righe vuote e quelle che
+  iniziano con # vengono ignorate, come i commenti dopo uno spazio e #.
+  Le liste vengono scaricate in una cartella temporanea (serve curl o wget)
+  e analizzate come le altre: Pi-hole, /etc/pihole e gravity.db non vengono
+  né letti né modificati. Nei risultati ogni lista è indicata come list.N,
+  dove N è la posizione dell'indirizzo nel file (senza contare righe vuote,
+  commenti e doppioni). Si possono aggiungere anche altri file o cartelle.
+
 Formati supportati:
-  domini semplici, hosts (127.0.0.1 dominio), Adblock (||dominio^).
+  domini semplici, hosts (127.0.0.1 dominio), Adblock (||dominio^),
+  dnsmasq (local=/dominio/, server=/dominio/, address=/dominio/).
   Commenti, regole cosmetiche e righe di eccezione (@@) vengono ignorati.
 
 Colori:
@@ -192,12 +217,13 @@ Compares Pi-hole blocklists: shows the percentage of domains shared by every
 pair of lists and gives final advice on what to keep or remove.
 
 Usage:
-  $s [options] [folder/ | list1 list2 ...]
+  $s [options] [--list FILE] [folder/ | list1 list2 ...]
 
   No paths:      lists downloaded by Pi-hole; if there are none, the files
                  in the script's folder.
   With a folder: the .txt, .list and .hosts files inside it.
   With files:    only those given (at least 2).
+  With --list:   the lists downloaded from the addresses in the given file.
 
 Options:
   -h, --help   show this help
@@ -207,6 +233,8 @@ Options:
   --no-clear   do not clear the screen at startup
   --no-sqlite  do not read gravity.db: analyze all the lists found, including
                disabled ones, and take the names from the files only
+  --list FILE  read from FILE the addresses (one per line) of the lists to
+               download and compare, without using Pi-hole
 
 Pi-hole lists:
   With no paths the script looks for list.*.domains in /etc/pihole and in
@@ -216,8 +244,18 @@ Pi-hole lists:
   It also reports enabled lists that have no downloaded file yet.
   Use --no-sqlite to skip this.
 
+List file (--list):
+  One http:// or https:// address per line. Blank lines and lines starting
+  with # are ignored, as are comments after a space and #. The lists are
+  downloaded to a temporary folder (curl or wget is needed) and analyzed
+  like the others: Pi-hole, /etc/pihole and gravity.db are neither read nor
+  modified. In the results each list is shown as list.N, where N is the
+  position of the address in the file (not counting blank lines, comments
+  and duplicates). Other files or folders can be added as well.
+
 Supported formats:
-  plain domains, hosts (127.0.0.1 domain), Adblock (||domain^).
+  plain domains, hosts (127.0.0.1 domain), Adblock (||domain^),
+  dnsmasq (local=/domain/, server=/domain/, address=/domain/).
   Comments, cosmetic rules and exception lines (@@) are ignored.
 
 Colors:
@@ -243,6 +281,8 @@ USO
 colori=auto
 pulisci=si
 usa_sqlite=si
+usa_lista=no
+lista_file=""
 args=()
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -252,6 +292,13 @@ while [ "$#" -gt 0 ]; do
         --no-color) colori=no ;;
         --no-clear) pulisci=no ;;
         --no-sqlite) usa_sqlite=no ;;
+        --list)
+            if [ "$#" -lt 2 ] || [ -z "$2" ]; then echo "$M_LIST_ARG" >&2; exit 2; fi
+            usa_lista=si; lista_file=$2; shift ;;
+        --list=*)
+            lista_file=${1#--list=}
+            if [ -z "$lista_file" ]; then echo "$M_LIST_ARG" >&2; exit 2; fi
+            usa_lista=si ;;
         --) shift; args+=("$@"); break ;;
         -?*) printf "$M_UNKNOWN_OPT" "$1" >&2; exit 2 ;;
         *) args+=("$1") ;;
@@ -322,6 +369,8 @@ DIR_SCRIPT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DIR_PIHOLE=${PIHOLE_DIR:-/etc/pihole}
 GRAVITY_DB="$DIR_PIHOLE/gravity.db"
 modo_pihole=0
+modo_lista=0
+declare -A url_da_file=()
 files=()
 
 # Liste scaricate da Pi-hole: list.<id>.<dominio>.domains
@@ -400,7 +449,7 @@ segnala_mancanti() {
     done
 }
 
-if [ "$#" -eq 0 ]; then
+if [ "$#" -eq 0 ] && [ "$usa_lista" = "no" ]; then
     while IFS= read -r f; do files+=("$f"); done < <(trova_liste_pihole)
 
     # Liste abilitate nel database e, tra queste, quelle senza file scaricato
@@ -449,6 +498,83 @@ if [ "$#" -eq 0 ]; then
     fi
 fi
 
+# --- liste indicate in un file di testo (--list) ---
+# Il file contiene un indirizzo http(s) per riga; righe vuote e commenti (#) sono
+# ignorati. Le liste vengono scaricate in $tmp/dl come list.N.domains, dove N è la
+# posizione dell'indirizzo nel file. Pi-hole e gravity.db non vengono usati.
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+scarica_url() {
+    local url=$1 dest=$2
+    if command -v curl > /dev/null 2>&1; then
+        curl -fsSL --connect-timeout 15 --max-time 600 --retry 2 -o "$dest" "$url" 2> /dev/null
+    else
+        wget -q --timeout=30 --tries=2 -O "$dest" "$url" 2> /dev/null
+    fi
+}
+
+scarica_liste() {
+    local riga url dest n tot numriga=0
+    local urls=()
+    local -A gia=()
+    if [ ! -f "$lista_file" ]; then
+        printf "$M_NOT_FOUND" "$lista_file" >&2
+        exit 1
+    fi
+    if [ ! -r "$lista_file" ]; then
+        printf "$M_DENIED" "$lista_file" >&2
+        exit 1
+    fi
+    while IFS= read -r riga || [ -n "$riga" ]; do
+        numriga=$((numriga + 1))
+        riga=${riga//$'\r'/}
+        if [ "$numriga" -eq 1 ]; then riga=${riga#$'\xef\xbb\xbf'}; fi  # BOM di Notepad
+        riga=${riga%%[[:space:]]#*}                                      # commento a fine riga
+        riga=${riga#"${riga%%[![:space:]]*}"}
+        riga=${riga%"${riga##*[![:space:]]}"}
+        case "$riga" in '' | '#'*) continue ;; esac
+        if ! [[ "$riga" =~ ^https?://[^[:space:]]+$ ]]; then
+            avviso "$(printf "$M_LIST_BADLINE" "$numriga" "$lista_file")"
+            continue
+        fi
+        if [ -z "${gia[$riga]:-}" ]; then
+            gia[$riga]=1
+            urls+=("$riga")
+        fi
+    done < "$lista_file"
+
+    tot=${#urls[@]}
+    if [ "$tot" -eq 0 ]; then
+        printf "$M_LIST_EMPTY\n" "$lista_file" >&2
+        exit 1
+    fi
+    if ! command -v curl > /dev/null 2>&1 && ! command -v wget > /dev/null 2>&1; then
+        echo "$M_LIST_NOTOOL" >&2
+        exit 1
+    fi
+
+    modo_lista=1
+    mkdir -p "$tmp/dl"
+    printf "$M_LIST_INFO" "$tot" "$lista_file"
+    n=0
+    for url in "${urls[@]}"; do
+        n=$((n + 1))
+        dest="$tmp/dl/list.$n.domains"
+        printf "$M_LIST_ITEM" "$n" "$url"
+        if scarica_url "$url" "$dest"; then
+            files+=("$dest")
+            url_da_file[$dest]=$url
+        else
+            rm -f "$dest"
+            avviso "$(printf "$M_LIST_FAIL" "$n" "$url")"
+        fi
+    done
+    echo
+}
+
+if [ "$usa_lista" = "si" ]; then scarica_liste; fi
+
 # --- raccolta dei file indicati ---
 for arg in "$@"; do
     if [ -d "$arg" ]; then
@@ -485,9 +611,6 @@ for f in "${files[@]}"; do
     fi
 done
 
-tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
-
 # --- lettura delle liste ---
 
 # Normalizzazione: un dominio per riga, minuscolo, senza duplicati
@@ -499,6 +622,14 @@ normalizza() {
             if (line == "" || line ~ /^[#!\[]/ || line ~ /^@@/) next
             if (line ~ /^[^ \t#]+#[@?$%]*#/) next  # regole cosmetiche Adblock (##, #@#, ...)
             sub(/[ \t]*#.*$/, "", line)            # commenti a fine riga
+            if (line ~ /^(local|server|address)=\//) {  # dnsmasq: local=/dominio/
+                n = split(substr(line, index(line, "=") + 2), parti, "/")
+                for (i = 1; i <= n; i++) {
+                    d = parti[i]
+                    if (d ~ /^[a-z0-9._*-]+$/ && d ~ /\./ && d !~ /^[0-9.]+$/) print d
+                }
+                next
+            }
             if (line ~ /^(0\.0\.0\.0|127\.0\.0\.1|::1?)[ \t]+/) {
                 sub(/^[^ \t]+[ \t]+/, "", line)    # prefisso hosts
             }
@@ -577,6 +708,14 @@ for i in "${!files[@]}"; do
         IFS='|' read -r indirizzo commento < <(info_adlist "$id") || true
         if [ -z "$titolo" ]; then
             titolo=${commento:-${indirizzo#*://}}
+            if [ "${#titolo}" -gt 45 ]; then titolo="${titolo:0:42}..."; fi
+        fi
+        nome="list.$id"
+    elif [ -n "${url_da_file[$f]:-}" ]; then
+        id=$(id_da_file "$f")
+        indirizzo=${url_da_file[$f]}
+        if [ -z "$titolo" ]; then
+            titolo=${indirizzo#*://}
             if [ "${#titolo}" -gt 45 ]; then titolo="${titolo:0:42}..."; fi
         fi
         nome="list.$id"
@@ -845,11 +984,17 @@ fi
 echo
 titolo_sez "$M_S9"
 if [ "${#rimosse[@]}" -gt 0 ]; then
-    echo "$M_S9_1"
-    for k in "${rimosse[@]}"; do printf '       - %s\n' "${names[k]}"; done
-    echo "$M_S9_2"
-    echo "$M_S9_3"
-    echo "$M_S9_4"
+    if [ "$modo_lista" -eq 1 ]; then
+        printf "$M_S9_1L" "$lista_file"
+        for k in "${rimosse[@]}"; do printf '       - %s\n' "${names[k]}"; done
+        echo "$M_S9_2L"
+    else
+        echo "$M_S9_1"
+        for k in "${rimosse[@]}"; do printf '       - %s\n' "${names[k]}"; done
+        echo "$M_S9_2"
+        echo "$M_S9_3"
+        echo "$M_S9_4"
+    fi
 else
     valuta=-1; vc=0
     for k in "${tutte[@]}"; do
@@ -860,7 +1005,7 @@ else
     done
     if [ "$valuta" -ge 0 ]; then
         printf "$M_S9_TRY" "${names[valuta]}" "$(pcol "$vc")"
-        echo "$M_S9_THEN"
+        if [ "$modo_lista" -eq 1 ]; then echo "$M_S9_THEN_L"; else echo "$M_S9_THEN"; fi
     else
         printf "$M_S9_OK" "$VERDE" "$RESET"
     fi

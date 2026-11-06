@@ -123,11 +123,12 @@ Find out which of your blocklists are redundant. For every pair of lists it show
 |---|---|
 | 🔎 **Auto-detection** | Finds the lists downloaded by Pi-hole in `/etc/pihole` and `/etc/pihole/listsCache`, otherwise uses the files in the script folder |
 | ✅ **Active Lists Only** | With `sqlite3` installed, reads `gravity.db` to skip disabled lists, show the name of each list and warn about enabled lists that have no downloaded file yet |
+| 📝 **List File** | With `--list FILE`, reads the addresses of the lists from a text file, downloads them and analyzes them without using Pi-hole |
 | 📊 **Pairwise Overlap** | Shared domains and percentage for every pair of lists, with color-coded highlights |
 | 🎯 **Unique Contribution** | Domains that only each list blocks, and how much of each list is covered by the others |
 | 🧪 **Removal Simulation** | Removes redundant lists one at a time, recomputing the unique contribution after each step |
 | 🛡️ **Protected Lists** | Phishing, malware, privacy and tracker lists are never suggested for automatic removal |
-| 📄 **Formats** | Plain domains, hosts files and Adblock syntax |
+| 📄 **Formats** | Plain domains, hosts files, Adblock syntax and dnsmasq (`local=/domain/`) |
 | 🌐 **Languages** | English by default, Italian with `--it` |
 
 #### Advice
@@ -151,6 +152,7 @@ Each list gets a verdict, followed by a short action plan:
 | `--no-color` | Disable colors |
 | `--no-clear` | Do not clear the screen at startup |
 | `--no-sqlite` | Do not read `gravity.db`: analyze all the lists found (including disabled ones) and take the names from the files only |
+| `--list FILE` | Read the list addresses (one per line) from `FILE`, download them and compare them without using Pi-hole |
 
 #### Notes
 
@@ -158,6 +160,10 @@ Each list gets a verdict, followed by a short action plan:
 - The category of each list is estimated from its name, title and address, not verified against the source
 - The thresholds used for the advice are editable at the top of the script
 - Set `PIHOLE_DIR` to use a Pi-hole folder other than `/etc/pihole`
+- With `--list FILE` the file contains one `http://` or `https://` address per line; blank lines and lines starting with `#` are ignored, as are comments after a space and `#`
+- The lists are downloaded to a temporary folder (deleted at the end) and shown as `list.N`, where N is the position of the address in the file, not counting blank lines, comments and duplicates
+- With `--list`, Pi-hole, `/etc/pihole` and `gravity.db` are neither read nor modified, so the script works without Pi-hole and does not need `sudo`
+- `--list` can be combined with other list files or folders passed as arguments
 
 <!-- TODO: add the screenshot as images/overlap.png -->
 ![Overlap Audit](images/overlap.png)
@@ -169,6 +175,7 @@ Each list gets a verdict, followed by a short action plan:
 - Root access to your Pi-hole server
 - Running Pi-hole installation
 - `sqlite3` (optional, used by the Overlap Audit to skip disabled lists)
+- `curl` or `wget` (optional, used by the Overlap Audit with `--list`)
 - Basic command line knowledge
 
 ---
@@ -225,6 +232,12 @@ sudo ./pihole-overlap-audit.bash
 
 Add `--it` for Italian output, or pass a folder or list files to compare specific lists. Run it with `--help` to see all options.
 
+To compare lists that are not configured in Pi-hole, put one address per line in a text file and pass it with `--list` (no `sudo` needed):
+
+```bash
+./pihole-overlap-audit.bash --list lists.txt
+```
+
 ---
 
 ## ❗ Troubleshooting <a name="troubleshooting"></a>
@@ -236,6 +249,8 @@ Add `--it` for Italian output, or pass a folder or list files to compare specifi
 - The status report authenticates automatically via `/etc/pihole/cli_pw`
 - If the overlap audit finds no Pi-hole lists, run it with `sudo` or pass the list files (or a folder) explicitly
 - If the overlap audit warns that it cannot tell which lists are disabled, `sqlite3` is missing or `gravity.db` is not readable: install `sqlite3` and run with `sudo`, or use `--no-sqlite` to analyze all lists on purpose
+- If the overlap audit prints "download failed" for a list, check the address in the `--list` file and your connection: that list is skipped and the others are still compared
+- If the overlap audit prints "curl or wget is needed", install one of them to use `--list`
 - The overlap audit never modifies your configuration: disable lists from the Pi-hole web interface and run `pihole -g` yourself
 
 ### Reverting Query Number Changes
